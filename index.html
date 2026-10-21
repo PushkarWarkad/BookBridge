@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookBridge — Find Books Nearby</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="navbar">
+
+    <a class="logo" href="#">
+      📚 BookBridge
+    </a>
+
+    <nav>
+      <a href="#browse">Browse</a>
+      <a href="#list">List a Book</a>
+      <a href="#how">How it works</a>
+    </nav>
+
+    <button
+      class="nav-btn"
+      onclick="document.getElementById('list').scrollIntoView()"
+    >
+      List a Book
+    </button>
+
+  </header>
+
+
+  <main>
+
+    <!-- HERO / SEARCH SECTION -->
+
+    <section class="hero">
+
+      <div class="hero-content">
+
+        <span class="badge">
+          Student-to-student book exchange
+        </span>
+
+        <h1>
+          Find the books you need,
+          <span>near you.</span>
+        </h1>
+
+        <p>
+          Buy, rent, borrow or sell academic books
+          with students around you.
+        </p>
+
+
+        <!-- SEARCH BOX -->
+
+        <div class="search-box">
+
+          <!-- Search text -->
+
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search for a book, author or subject..."
+          />
+
+
+          <!-- Buy / Rent / Borrow filter -->
+
+          <select id="searchType">
+
+            <option value="all">
+              All options
+            </option>
+
+            <option value="Buy">
+              Buy
+            </option>
+
+            <option value="Rent">
+              Rent
+            </option>
+
+            <option value="Borrow">
+              Borrow
+            </option>
+
+          </select>
+
+
+          <!-- Distance filter -->
+
+          <select id="distanceFilter">
+
+            <option value="10">
+              Within 10 km
+            </option>
+
+            <option value="5">
+              Within 5 km
+            </option>
+
+            <option value="3">
+              Within 3 km
+            </option>
+
+            <option value="1">
+              Within 1 km
+            </option>
+
+          </select>
+
+
+          <!-- Search button -->
+
+          <button
+            id="searchButton"
+            onclick="searchBooks()"
+          >
+            Search
+          </button>
+
+        </div>
+
+
+        <!-- QUICK SEARCH -->
+
+        <div class="quick-searches">
+
+          <span>Try:</span>
+
+          <button onclick="quickSearch('Physics')">
+            Physics
+          </button>
+
+          <button onclick="quickSearch('NCERT')">
+            NCERT
+          </button>
+
+          <button onclick="quickSearch('Mathematics')">
+            Mathematics
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- BROWSE BOOKS -->
+
+    <section id="browse" class="section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="eyebrow">
+            Marketplace
+          </span>
+
+          <h2>
+            Books available nearby
+          </h2>
+
+        </div>
+
+
+        <!-- Existing marketplace filter -->
+
+        <select
+          id="filterType"
+          onchange="renderBooks()"
+        >
+
+          <option value="all">
+            All options
+          </option>
+
+          <option value="Buy">
+            Buy
+          </option>
+
+          <option value="Rent">
+            Rent
+          </option>
+
+          <option value="Borrow">
+            Borrow
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <p
+        id="resultCount"
+        class="result-count"
+      ></p>
+
+
+      <div
+        id="bookGrid"
+        class="book-grid"
+      ></div>
+
+
+      <div
+        id="emptyState"
+        class="empty hidden"
+      >
+
+        <div>🔎</div>
+
+        <h3>
+          No books found
+        </h3>
+
+        <p>
+          Try another search or list the book you have.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- LIST A BOOK -->
+
+    <section
+      id="list"
+      class="section form-section"
+    >
+
+      <div class="form-intro">
+
+        <span class="eyebrow">
+          Give a book a second life
+        </span>
+
+        <h2>
+          List your book
+        </h2>
+
+        <p>
+          Add a book you no longer need
+          and help another student find it.
+        </p>
+
+      </div>
+
+
+      <form id="bookForm">
+
+        <div class="form-grid">
+
+          <label>
+            Book name *
+
+            <input
+              name="title"
+              required
+              placeholder="e.g. Concepts of Physics Vol. 1"
+            />
+
+          </label>
+
+
+          <label>
+            Author
+
+            <input
+              name="author"
+              placeholder="e.g. H. C. Verma"
+            />
+
+          </label>
+
+
+          <label>
+            Subject
+
+            <input
+              name="subject"
+              placeholder="e.g. Physics"
+            />
+
+          </label>
+
+
+          <label>
+            Condition
+
+            <select name="condition">
+
+              <option>
+                Excellent
+              </option>
+
+              <option>
+                Good
+              </option>
+
+              <option>
+                Fair
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <label>
+            Option
+
+            <select name="type">
+
+              <option>
+                Sell
+              </option>
+
+              <option>
+                Rent
+              </option>
+
+              <option>
+                Borrow
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <label>
+            Price (₹)
+
+            <input
+              name="price"
+              type="number"
+              min="0"
+              placeholder="0"
+            />
+
+          </label>
+
+
+          <label>
+            Distance (km)
+
+            <input
+              name="distance"
+              type="number"
+              min="0"
+              step="0.1"
+              placeholder="1.5"
+            />
+
+          </label>
+
+
+          <label>
+            Owner name
+
+            <input
+              name="owner"
+              placeholder="Your name"
+            />
+
+          </label>
+
+        </div>
+
+
+        <button
+          class="primary-btn"
+          type="submit"
+        >
+          + List this book
+        </button>
+
+
+        <p
+          id="formMessage"
+          class="form-message"
+        ></p>
+
+      </form>
+
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+
+    <section
+      id="how"
+      class="section how-section"
+    >
+
+      <span class="eyebrow">
+        Simple by design
+      </span>
+
+      <h2>
+        How BookBridge works
+      </h2>
+
+
+      <div class="steps">
+
+        <article>
+
+          <b>01</b>
+
+          <h3>
+            Search
+          </h3>
+
+          <p>
+            Find the academic book you need.
+          </p>
+
+        </article>
+
+
+        <article>
+
+          <b>02</b>
+
+          <h3>
+            Choose
+          </h3>
+
+          <p>
+            Compare nearby buy, rent or borrow options.
+          </p>
+
+        </article>
+
+
+        <article>
+
+          <b>03</b>
+
+          <h3>
+            Request
+          </h3>
+
+          <p>
+            Contact the student who has the book.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <strong>
+      📚 BookBridge
+    </strong>
+
+    <p>
+      Built to make academic books more affordable
+      and accessible.
+    </p>
+
+  </footer>
+
+
+  <!-- BOOK DETAILS MODAL -->
+
+  <div
+    id="modal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card">
+
+      <button
+        class="close"
+        onclick="closeModal()"
+      >
+        ×
+      </button>
+
+      <div id="modalContent"></div>
+
+    </div>
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
