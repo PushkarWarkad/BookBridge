@@ -3,8 +3,8 @@
 // ============================================================
 
 // Backend API
-const API_URL = "http://localhost:5000/api/books";
-const REQUEST_API_URL = "http://localhost:5000/api/requests";
+const API_URL = "https://bookbridge-backend-dim3.onrender.com/api/books";
+const REQUEST_API_URL = "https://bookbridge-backend-dim3.onrender.com/api/requests";
 
 // Books currently loaded from PostgreSQL
 let books = [];
@@ -399,7 +399,7 @@ async function submitBookRequest(event, bookId) {
 
             <p>
                 Your request for
-                <strong>${escapeHtml(result.request.requester_name)}</strong>
+                <strong>${escapeHtml(books.find(book => Number(book.id) === Number(bookId))?.title || "the book")}</strong>
                 has been saved.
             </p>
 
