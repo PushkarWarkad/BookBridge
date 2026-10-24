@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
 const app = express();
@@ -43,6 +45,128 @@ app.get("/", async (req, res) => {
 
 });
 
+// ============================================================
+// USER SIGN UP
+// ============================================================
+
+app.post("/api/auth/signup", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Validate input
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                message: "Name, email and password are required"
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters"
+            });
+        }
+
+        // Hash password before saving
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        // Create user
+        const result = await pool.query(
+            `INSERT INTO users (name, email, password_hash)
+             VALUES ($1, $2, $3)
+             RETURNING id, name, email, created_at`,
+            [name.trim(), email.trim().toLowerCase(), passwordHash]
+        );
+
+        res.status(201).json({
+            message: "Account created successfully",
+            user: result.rows[0]
+        });
+
+    } catch (error) {
+        if (error.code === "23505") {
+            return res.status(409).json({
+                message: "An account with this email already exists"
+            });
+        }
+
+        console.error("Signup error:", error.message);
+
+        res.status(500).json({
+            message: "Failed to create account"
+        });
+    }
+});
+
+// ============================================================
+// USER LOGIN
+// ============================================================
+
+app.post("/api/auth/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required"
+            });
+        }
+
+        // Find registered user
+        const result = await pool.query(
+            `SELECT id, name, email, password_hash
+             FROM users
+             WHERE email = $1`,
+            [email.trim().toLowerCase()]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({
+                message: "Invalid email or password"
+            });
+        }
+
+        const user = result.rows[0];
+
+        // Verify password
+        const passwordMatches = await bcrypt.compare(
+            password,
+            user.password_hash
+        );
+
+        if (!passwordMatches) {
+            return res.status(401).json({
+                message: "Invalid email or password"
+            });
+        }
+
+        // Create authentication token
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.json({
+            message: "Login successful",
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+        });
+
+    } catch (error) {
+        console.error("Login error:", error.message);
+
+        res.status(500).json({
+            message: "Login failed"
+        });
+    }
+});
 
 // ============================================================
 // GET ALL BOOKS

@@ -464,10 +464,14 @@ function showFormMessage(message, isError = false) {
 const bookForm = document.getElementById("bookForm");
 
 if (bookForm) {
-    bookForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
+   bookForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-        const formData = new FormData(bookForm);
+    if (!requireStudentLogin()) {
+        return;
+    }
+
+    const formData = new FormData(bookForm);
 
         const newBook = {
             title: String(formData.get("title") || "").trim(),
@@ -554,3 +558,149 @@ if (searchInput) {
 // ============================================================
 
 loadBooks();
+// ============================================================
+// BOOKBRIDGE STUDENT AUTHENTICATION
+// ============================================================
+
+const AUTH_API_URL = "https://bookbridge-backend-dim3.onrender.com/api/auth";
+
+let authMode = "login";
+
+const authForm = document.getElementById("authForm");
+const authName = document.getElementById("authName");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+const authSubmit = document.getElementById("authSubmit");
+const authSwitch = document.getElementById("authSwitch");
+const authSwitchText = document.getElementById("authSwitchText");
+const authMessage = document.getElementById("authMessage");
+
+// Switch between Login and Signup
+
+authSwitch.addEventListener("click", () => {
+    authMode = authMode === "login" ? "signup" : "login";
+
+    const isSignup = authMode === "signup";
+
+    authTitle.textContent = isSignup ? "Create Account" : "Student Login";
+
+    authSubtitle.textContent = isSignup
+        ? "Join the BookBridge student community!"
+        : "Welcome back to BookBridge!";
+
+    authName.style.display = isSignup ? "block" : "none";
+    authName.required = isSignup;
+
+    authSubmit.textContent = isSignup ? "Sign Up" : "Login";
+
+    authSwitchText.textContent = isSignup
+        ? "Already have an account?"
+        : "New to BookBridge?";
+
+    authSwitch.textContent = isSignup
+        ? "Login"
+        : "Create an account";
+
+    authMessage.textContent = "";
+});
+
+// Handle Login and Signup
+authForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    authMessage.textContent = "Please wait...";
+
+    const endpoint =
+        authMode === "login" ? "/login" : "/signup";
+
+    const body = {
+        email: authEmail.value.trim(),
+        password: authPassword.value
+    };
+
+    if (authMode === "signup") {
+        body.name = authName.value.trim();
+    }
+
+    try {
+        const response = await fetch(AUTH_API_URL + endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Authentication failed");
+        }
+
+        if (authMode === "signup") {
+            authMessage.textContent =
+                "Account created! Please log in.";
+
+            authMessage.style.color = "green";
+
+            authMode = "login";
+            authTitle.textContent = "Student Login";
+            authSubtitle.textContent = "Welcome back to BookBridge!";
+            authName.style.display = "none";
+            authName.required = false;
+            authSubmit.textContent = "Login";
+            authSwitchText.textContent = "New to BookBridge?";
+            authSwitch.textContent = "Create an account";
+
+            authPassword.value = "";
+        } else {
+            sessionStorage.setItem("bookbridge_token", data.token);
+            sessionStorage.setItem(
+                "bookbridge_user",
+                JSON.stringify(data.user)
+            );
+
+            authMessage.textContent =
+                "Login successful! Welcome, " + data.user.name + ".";
+
+            authMessage.style.color = "green";
+        }
+
+    } catch (error) {
+        authMessage.textContent = error.message;
+        authMessage.style.color = "red";
+    }
+});
+// OPEN LOGIN / SIGNUP SECTION
+
+function isStudentLoggedIn() {
+    return Boolean(sessionStorage.getItem("bookbridge_token"));
+}
+
+function requireStudentLogin() {
+    if (isStudentLoggedIn()) {
+        return true;
+    }
+
+    openAuth();
+
+    authMessage.textContent =
+        "Please log in or create an account to continue.";
+
+    authMessage.style.color = "red";
+
+    return false;
+}
+
+function openAuth() {
+    const authSection = document.getElementById("authSection");
+
+    authSection.classList.add("active");
+
+    authSection.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}

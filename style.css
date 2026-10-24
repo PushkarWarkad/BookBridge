@@ -689,3 +689,81 @@ footer p{
   }
 
 }
+/* STUDENT AUTHENTICATION */
+
+.auth-section {
+    max-width: 420px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+.auth-container {
+    background: white;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.auth-container h2 {
+    color: #4f46e5;
+    margin-bottom: 8px;
+}
+
+.auth-container p {
+    color: #666;
+}
+
+#authForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+#authForm input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+#authSubmit {
+    background: #635bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#authSubmit:hover {
+    background: #4f46e5;
+}
+
+#authSwitch {
+    background: none;
+    border: none;
+    color: #635bff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
+#authMessage {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.auth-section {
+    display: none;
+}
+
+.auth-section.active {
+    display: block;
+}
+
+.login-nav-btn {
+    margin-left: 10px;
+}
